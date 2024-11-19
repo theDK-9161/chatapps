@@ -1,6 +1,42 @@
-import streamlit as st
+from pymongo.mongo_client import MongoClient
+import pymongo
+import requests
+import threading
+import time
+import bson
+import datetime
+uri = "mongodb+srv://gembot:footfootfoot444@cluster0.ort1r.mongodb.net/?retryWrites=true&w=majority"
+# Create a new client and connect to the server
+dbclient = MongoClient(uri)
+# Send a ping to confirm a successful connection
 
-st.title("🎈 My new app")
-st.write(
-    "Let's start building! For help and inspiration, head over to [docs.streamlit.io](https://docs.streamlit.io/)."
-)
+db = dbclient["gemmy"]
+collection = db["footcoin"]
+promocodes = db['promocodes']
+globalmsgs = db["global-msgs"]
+messages1 = db["chatMESSAGES"]
+
+color = ''
+
+st.title("Clush - Special Force Group")
+st.header("Chat App")
+def send_message():
+    messages1.insert_one({'name': "TestSubject", 'message': f"{st.session_state.user_name}: {st.session_state.user_input}", 'time': datetime.datetime.fromtimestamp(time.time(), datetime.timezone.utc), 'color': st.session_state.message_color})
+prompt = st.chat_input("Type a message...", on_submit=send_message, key='user_input')
+
+
+st.color_picker('Pick the color you want your message to be.', '#FFFFFF', key='message_color')
+st.text_input('Enter your username here!', key='user_name')
+@st.fragment(run_every="5s")
+def reload_messages():
+    messages = []
+    print("/")
+    print("?")
+    for msg in messages1.find():
+        messages.append({'name': msg['color'], 'color': msg['color'], 'message': msg['message']})
+    for message in messages:
+        messageUser = st.chat_message(message['name'])
+        messageUser.write(f'<span style="color:{message["color"]}">{message["message"]}</span>', unsafe_allow_html=True)
+
+
+reload_messages()
