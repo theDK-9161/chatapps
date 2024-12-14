@@ -1,11 +1,12 @@
-from pymongo.mongo_client import MongoClient
 import streamlit as st
+from pymongo.mongo_client import MongoClient
 import pymongo
 import requests
 import threading
 import time
 import bson
 import datetime
+import pytz
 uri = "mongodb+srv://gembot:footfootfoot444@cluster0.ort1r.mongodb.net/?retryWrites=true&w=majority"
 # Create a new client and connect to the server
 dbclient = MongoClient(uri)
@@ -34,10 +35,12 @@ def reload_messages():
     print("/")
     print("?")
     for msg in messages1.find():
-        messages.append({'name': msg['color'], 'color': msg['color'], 'message': msg['message']})
+        messages.append({'name': msg['color'], 'color': msg['color'], 'message': msg['message'], 'time': msg['time']})
     for message in messages:
+        python_datetime = message["time"].astimezone(pytz.timezone("US/Pacific"))
+        formatted_date = python_datetime.strftime('%Y-%m-%d %I:%M:%S %p')
         messageUser = st.chat_message(message['name'])
-        messageUser.write(f'<span style="color:{message["color"]}">{message["message"]}</span>', unsafe_allow_html=True)
+        messageUser.write(f'<p style="text-color: #b4b4b4; font-size: 14px;">{formatted_date}</p><span style="color:{message["color"]}">{message["message"]}</span>', unsafe_allow_html=True)
 
 
 reload_messages()
